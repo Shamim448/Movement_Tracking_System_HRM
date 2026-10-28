@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movement Tracking System</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- Admin Sidebar -->
+  <div class="sidebar" id="adminSidebar" style="display: none;">
+    <h2>Movement Tracking System</h2>
+    <p style="color: rgb(126, 159, 239); font-size: x-small; text-align: center; padding-bottom: 20px;"> Develpoed By Shamim Hosen</p>
+    <a href="#" onclick="showSection('currentPunchSection')">📅 Current Date List</a>
+    <a href="#" onclick="showSection('addUserSection')">➕ Add New User</a>
+    <a href="#" onclick="showSection('manageUsersSection')">👥 User List (Edit/Del)</a>
+    <a href="#" onclick="showSection('viewSection')">📊 Report View</a>
+    <a href="#" onclick="showSection('attendanceSection')">⏱️ Punch Attendance</a>
+    <a href="#" onclick="logout()" class="logout-btn">🚪 Logout</a>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-content full-width" id="mainContainer">
+
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="card page active" style="max-width: 400px; margin: 60px auto;">
+      <h2 style="text-align: center;">Tracker Login</h2>
+      <form id="loginForm">
+        <label>User ID</label>
+        <input type="text" id="loginUserId" required placeholder="Enter User ID">
+        <label>Password</label>
+        <input type="password" id="loginPassword" required placeholder="Enter Password">
+        <button type="submit">Login</button>
+        <p style="color: rgb(126, 159, 239); font-size: x-small; padding: 10px 0 0px 0;">&copy; Alim Knit (BD) Ltd-2026 | Develpoed By Shamim Hosen</p>
+      </form>
+    </div>
+
+    <!-- CURRENT DATE PUNCH LIST -->
+    <div id="currentPunchSection" class="card page wide" style="display: none;">
+      <div class="header-flex">
+        <h2>Today's Attendance Punch List (<span id="todayLabel"></span>)</h2>
+        <button onclick="loadCurrentDatePunch()" class="btn-refresh">🔄 Refresh</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Designation</th>
+              <th>Dept</th>
+              <th>Section</th>
+              <th>Submitted Date & Time</th>
+              <th>Status</th>
+              <th>Punch Date</th>
+              <th>Punch Time</th>
+              <th>User Location</th>
+              <th>Map Location</th>
+              <th>Map Link</th>
+            </tr>
+          </thead>
+          <tbody id="currentPunchTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE ENTRY SECTION (User Mode with Inline Logout next to h2) -->
+    <div id="attendanceSection" class="card page" style="display: none; max-width: 500px; margin: 0 auto;">
+      <div class="attendance-header-row">
+        <h2>Submit Attendance</h2>
+        <button onclick="logout()" class="btn-emp-logout-inline">🚪 Logout</button>
+      </div>
+
+      <form id="attendanceForm">
+        <div class="user-info">
+          <p><strong>Name:</strong> <span id="dispName"></span></p>
+          <p><strong>ID:</strong> <span id="dispId"></span> | <strong>Desig:</strong> <span id="dispDesig"></span></p>
+          <p><strong>Dept:</strong> <span id="dispDept"></span> | <strong>Sec:</strong> <span id="dispSec"></span></p>
+        </div>
+
+        <label>Punch Status</label>
+        <select id="punchStatus" required>
+          <option value="IN">IN</option>
+          <option value="OUT">OUT</option>
+        </select>
+
+        <label>Punch Date (DD-Mon-YYYY)</label>
+        <input type="text" id="punchDate" placeholder="26-Oct-2026" required>
+
+        <label>Punch Time (12-Hour Format)</label>
+        <div class="time-container">
+          <input type="text" id="punchTime12" placeholder="hh:mm" required>
+          <select id="punchAmPm" required>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+
+        <label>User Location (Text)</label>
+        <input type="text" id="userLocation" placeholder="Current office/client site name" required>
+
+        <p class="gps-status" id="gpsStatus">📍 Auto Fetching Location...</p>
+        <button type="button" class="btn-gps" onclick="initAutoGPS(true)">Get GPS Location Manually</button>
+
+        <input type="hidden" id="mapLocationName">
+        <input type="hidden" id="mapLink">
+
+        <button type="submit" id="subBtn">Submit Attendance</button>
+        <p style="color: rgb(126, 159, 239); font-size: x-small; padding: 10px 0 0px 0; text-align: center;">&copy; Alim Knit (BD) Ltd-2026 | Developed By Shamim Hosen</p>
+      </form>
+    </div>
+
+    <!-- ADD USER SECTION -->
+    <div id="addUserSection" class="card page" style="display: none; max-width: 500px; margin: 0 auto;">
+      <h2>Add New User</h2>
+      <form id="addUserForm">
+        <label>User ID</label>
+        <input type="text" id="newUserId" required>
+        <label>Password</label>
+        <input type="text" id="newPassword" required>
+        <label>User Name</label>
+        <input type="text" id="newUserName" required>
+        <label>Designation</label>
+        <input type="text" id="newDesignation" required>
+        <label>Department</label>
+        <input type="text" id="newDepartment" required>
+        <label>Section</label>
+        <input type="text" id="newSection" required>
+        <label>User Role (Mode)</label>
+        <select id="newUserRole" required>
+          <option value="employee">Employee (Punch Mode Only)</option>
+          <option value="admin">Admin (Full Control)</option>
+        </select>
+        <button type="submit">Create User</button>
+        <p style="color: rgb(126, 159, 239); font-size: x-small; padding: 10px 0 0px 0;">&copy; Alim Knit (BD) Ltd-2026 | Develpoed By Shamim Hosen</p>
+      </form>
+    </div>
+
+    <!-- USER LIST SECTION -->
+    <div id="manageUsersSection" class="card page wide" style="display: none;">
+      <h2>User List & Management</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Designation</th>
+              <th>Dept</th>
+              <th>Section</th>
+              <th>Role</th>
+              <th>Password</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REPORT VIEW SECTION -->
+    <div id="viewSection" class="card page wide" style="display: none;">
+      <h2>Attendance Report View</h2>
+      <div class="filters">
+        <input type="text" id="fStartDate" placeholder="From Date (26-Oct-2026)">
+        <input type="text" id="fEndDate" placeholder="To Date (26-Oct-2026)">
+        <input type="text" id="fName" placeholder="Search Name">
+        <input type="text" id="fDept" placeholder="Search Dept">
+        <input type="text" id="fSec" placeholder="Search Section">
+        <select id="fStatus">
+          <option value="">All Status</option>
+          <option value="IN">IN</option>
+          <option value="OUT">OUT</option>
+        </select>
+        <button onclick="loadViewData()">Filter</button>
+        <button onclick="exportToExcel()">📥 Excel Export</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Designation</th>
+              <th>Dept</th>
+              <th>Section</th>
+              <th>Submitted Date & Time</th>
+              <th>Status</th>
+              <th>Punch Date</th>
+              <th>Punch Time</th>
+              <th>User Location</th>
+              <th>Map Location</th>
+              <th>Map Link</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceTableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
