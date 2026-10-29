@@ -210,7 +210,7 @@ document.getElementById('attendanceForm').addEventListener('submit', function(e)
     punchTime: full12Time,
     userLocation: document.getElementById('userLocation').value,
     mapLink: document.getElementById('mapLink').value,
-        mapLocationName: document.getElementById('mapLocationName').value
+    mapLocationName: document.getElementById('mapLocationName').value
   };
 
   fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
@@ -374,8 +374,8 @@ function renderTable() {
       <td>${formatBDDate(row[7])}</td>
       <td>${formatBDTime(row[8])}</td>
       <td>${row[9]}</td>
-      <td>${row[10]}</td>
       <td><a href="${row[11]}" target="_blank">View Map</a></td>
+      <td>${row[10]}</td>
     `;
     tbody.appendChild(tr);
   });
