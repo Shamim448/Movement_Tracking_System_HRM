@@ -209,8 +209,8 @@ document.getElementById('attendanceForm').addEventListener('submit', function(e)
     punchDate: document.getElementById('punchDate').value,
     punchTime: full12Time,
     userLocation: document.getElementById('userLocation').value,
-    mapLocationName: document.getElementById('mapLocationName').value,
-    mapLink: document.getElementById('mapLink').value
+    mapLink: document.getElementById('mapLink').value,
+        mapLocationName: document.getElementById('mapLocationName').value
   };
 
   fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
@@ -245,8 +245,9 @@ function loadCurrentDatePunch() {
           <td>${formatBDDate(row[7])}</td>
           <td>${formatBDTime(row[8])}</td>
           <td>${row[9]}</td>
-          <td>${row[10]}</td>
           <td><a href="${row[11]}" target="_blank">View Map</a></td>
+          <td>${row[10]}</td>
+
         `;
         tbody.appendChild(tr);
       });
